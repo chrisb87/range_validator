@@ -1,0 +1,6 @@
+en:
+  errors:
+    messages:
+      not_a_range: "is not a range"
+      overlap: "overlaps"
+      no_overlap: "does not overlap"

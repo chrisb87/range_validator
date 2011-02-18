@@ -1,0 +1,44 @@
+= range_validator
+
+Adds a RangeValidator to ActiveModel::Validations.
+
+  validates :field, :range => true
+  validates :field, :range => { :overlapping => :other_models }
+  validates :field, :range => { :not_overlapping => :other_models }
+
+= Examples
+
+Suppose we have an Event model and want to ensure its duration is a range.
+  
+  class Event
+    include ActiveModel::Validations
+    attr_accessor :duration
+    
+    validates :duration, :range => true
+  end
+  
+  event = Event.new
+  event.valid? #=> false
+  event.errors #=> #<OrderedHash {:duration=>["is not a range"]}>
+  
+  event.duration = 1..10
+  event.valid? #=> true
+  
+You can also validate that the range does or does not overlap with other models.
+
+  class Event
+    include ActiveModel::Validations
+    attr_accessor :duration, :other_events
+  
+    validates :duration, :range => { :not_overlapping_with => :other_events }
+  end
+  
+  event1 = Event.new
+  event1.duration = 1..10
+  
+  event2 = Event.new
+  event2.duration = 5..10
+  event2.other_events = [event1]
+  
+  event2.valid? #=> false
+  event2.errors #=> #<OrderedHash {:duration=>["overlaps"]}>
