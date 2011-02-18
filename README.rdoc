@@ -3,8 +3,8 @@
 Adds a RangeValidator to ActiveModel::Validations.
 
   validates :field, :range => true
-  validates :field, :range => { :overlapping => :other_models }
-  validates :field, :range => { :not_overlapping => :other_models }
+  validates :field, :range => { :overlapping => :other_records }
+  validates :field, :range => { :not_overlapping => :other_records }
 
 = Examples
 
@@ -18,27 +18,65 @@ Suppose we have an Event model and want to ensure its duration is a range.
   end
   
   event = Event.new
-  event.valid? #=> false
-  event.errors #=> #<OrderedHash {:duration=>["is not a range"]}>
+  event.valid? # => false
+  event.errors # => #<OrderedHash {:duration=>["is not a range"]}>
   
   event.duration = 1..10
-  event.valid? #=> true
+  event.valid? # => true
   
-You can also validate that the range does or does not overlap with other models.
+You can also validate that the range does or does not overlap with other 
+records. For this we need an easy way for a record to return a list of other 
+records that it should or should not overlap with. 
 
-  class Event
-    include ActiveModel::Validations
-    attr_accessor :duration, :other_events
-  
-    validates :duration, :range => { :not_overlapping_with => :other_events }
+This is easiest to demonstrate using ActiveRecord. First we create a migration
+for a Meeting model.
+
+  class CreateMeetings < ActiveRecord::Migration
+    def self.up
+      create_table :meetings do |t|
+        t.datetime :meeting_start
+        t.datetime :meeting_end
+        t.integer :room
+      end
+    end
+
+    def self.down
+      drop_table :meetings
+    end
   end
   
-  event1 = Event.new
-  event1.duration = 1..10
+We can use the range validator to ensure that two meetings cannot be booked in 
+the same room at the same time.
+
+  class Meeting < ActiveRecord::Base
+    validates :duration, :range => { :not_overlapping => :meetings_in_same_room }
   
-  event2 = Event.new
-  event2.duration = 5..10
-  event2.other_events = [event1]
+    def duration
+      meeting_start..meeting_end
+    end
   
-  event2.valid? #=> false
-  event2.errors #=> #<OrderedHash {:duration=>["overlaps"]}>
+    def meetings_in_same_room
+      Meeting.where :room => room
+    end
+  end
+
+Now meetings will validate like so:
+
+  meeting = Meeting.new
+  meeting.meeting_start = DateTime.now
+  meeting.meeting_end = DateTime.now + 1.hour
+  meeting.room = 12
+  
+  meeting.valid? # => true
+  meeting.save
+  
+  other_meeting = Meeting.new
+  other_meeting.meeting_start = DateTime.now
+  other_meeting.meeting_end = DateTime.now + 1.hour
+  other_meeting.room = 12
+  
+  other_meeting.valid? # => false
+  other_meeting.errors # => #<OrderedHash {:duration=>["overlaps"]}>
+  
+  other_meeting.room = 4
+  other_meeting.valid? # => true
