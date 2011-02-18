@@ -3,6 +3,8 @@ require 'active_support'
 
 module ActiveModel
   module Validations
+    
+    # == Active Model Range Validator
     class RangeValidator < ActiveModel::EachValidator
       OPTIONS = [:overlapping, :not_overlapping].freeze
       

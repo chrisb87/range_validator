@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'range_validator'
 
 describe "RangeValidator::OverlapDetector" do
-  
   range = 5..10
   tests = {
     1..4   => nil,     # before
@@ -21,10 +20,9 @@ describe "RangeValidator::OverlapDetector" do
     6...10 => 6..9,    # overlap_inner (exclusive range)
   }
 
-  tests.each do |other, expected|
-    it "should detect the overlap of #{range} and #{range} as #{expected.inspect}" do
-      ActiveModel::Validations::RangeValidator::OverlapDetector.overlap(range, other).should == expected
+  tests.each do |other_range, expected|
+    it "should detect the overlap of #{range} and #{other_range} as #{expected.inspect}" do
+      ActiveModel::Validations::RangeValidator::OverlapDetector.overlap(range, other_range).should == expected
     end
   end
-  
 end
