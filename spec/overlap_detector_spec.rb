@@ -20,9 +20,24 @@ describe "RangeValidator::OverlapDetector" do
     6...10 => 6..9,    # overlap_inner (exclusive range)
   }
 
-  tests.each do |other_range, expected|
-    it "should detect the overlap of #{range} and #{other_range} as #{expected.inspect}" do
-      ActiveModel::Validations::RangeValidator::OverlapDetector.overlap(range, other_range).should == expected
+  describe "#overlap" do
+    tests.each do |other_range, expected|
+      it "should detect the overlap of #{range} and #{other_range} as #{expected.inspect}" do
+        ActiveModel::Validations::RangeValidator::OverlapDetector.overlap(range, other_range).should == expected
+      end
+    end
+  end
+
+  describe "#overlap?" do
+    tests.each do |other_range, expected|
+      it "should detect that #{range} and #{other_range}#{expected.nil? ? ' do not' : ''} overlap" do
+        overlapping = ActiveModel::Validations::RangeValidator::OverlapDetector.overlap?(range, other_range)
+        if expected.nil?
+          overlapping.should be_false
+        else
+          overlapping.should be_true
+        end
+      end
     end
   end
 end

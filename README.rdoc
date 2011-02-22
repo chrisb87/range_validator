@@ -4,9 +4,9 @@ Adds a RangeValidator to ActiveModel::Validations.
 
   validates :field, :range => true
   validates :field, :range => { :overlapping => :other_records }
-  validates :field, :range => { :not_overlapping => :other_records }
+  validates :field, :range => { :not_overlapping => Proc.new{ |record| record.other_records } }
 
-= Examples
+== Examples
 
 Suppose we have an Event model and want to ensure its duration is a range.
   
@@ -24,12 +24,9 @@ Suppose we have an Event model and want to ensure its duration is a range.
   event.duration = 1..10
   event.valid? # => true
   
-You can also validate that the range does or does not overlap with other 
-records. For this we need an easy way for a record to return a list of other 
-records that it should or should not overlap with. 
-
-This is easiest to demonstrate using ActiveRecord. First we create a migration
-for a Meeting model.
+We can also validate that the range does or does not overlap with other 
+records. This is easiest to demonstrate using ActiveRecord. First we create a
+migration for a Meeting model.
 
   class CreateMeetings < ActiveRecord::Migration
     def self.up
@@ -49,14 +46,10 @@ We can use the range validator to ensure that two meetings cannot be booked in
 the same room at the same time.
 
   class Meeting < ActiveRecord::Base
-    validates :duration, :range => { :not_overlapping => :meetings_in_same_room }
+    validates :duration, :range => { :not_overlapping => Proc.new{ |m| Meeting.where :room => m.room } }
   
     def duration
       meeting_start..meeting_end
-    end
-  
-    def meetings_in_same_room
-      Meeting.where :room => room
     end
   end
 
@@ -80,3 +73,32 @@ Now meetings will validate like so:
   
   other_meeting.room = 4
   other_meeting.valid? # => true
+
+Constructing complex Procs in the validates method can become messy fast. We
+can move that logic into an instance method on the Meeting class and pass
+a Symbol to the range validator instead.
+
+  class Meeting < ActiveRecord::Base
+    validates :duration, :range => { :not_overlapping => :meetings_in_same_room }
+
+    def duration
+      meeting_start..meeting_end
+    end
+
+    def meetings_in_same_room
+      Meeting.where :room => room
+    end
+  end
+
+== Note on Patches/Pull Requests
+
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a
+  future version unintentionally.
+* Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
+* Send me a pull request. Bonus points for topic branches.
+
+== Copyright
+
+Copyright (c) 2011 Chris Baker. See LICENSE for details.
