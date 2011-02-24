@@ -1,42 +1,36 @@
 # -*- encoding: utf-8 -*-
-
 Gem::Specification.new do |s|
-  s.name = %q{range_validator}
-  s.version = "0.1.2"
+  s.name = "range_validator"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Chris Baker"]
-  s.date = %q{2011-02-22}
+  s.date = "2011-02-24"
   s.description = %q{Active Model Range Validator. 
       Supports validating that active model fields are valid ranges that do or do
       not overlap with other ranges.}
-  s.email = %q{baker.chris.3@gmail.com}
+  s.email = "baker.chris.3@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE",
     "README.rdoc"
   ]
   s.files = [
-    ".rspec",
     "Gemfile",
     "LICENSE",
     "README.rdoc",
     "Rakefile",
     "lib/range_validator.rb",
-    "lib/range_validator/overlap_detector.rb",
-    "lib/range_validator/validator.rb",
     "locales/en.yml",
     "range_validator.gemspec",
-    "spec/overlap_detector_spec.rb",
     "spec/range_validator_spec.rb",
     "spec/spec_helper.rb"
   ]
-  s.homepage = %q{http://github.com/chrisb87/range_validator}
+  s.homepage = "http://github.com/chrisb87/range_validator"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.5.2}
-  s.summary = %q{Active Model Range Validator}
+  s.rubygems_version = "1.5.2"
+  s.summary = "Active Model Range Validator"
   s.test_files = [
-    "spec/overlap_detector_spec.rb",
     "spec/range_validator_spec.rb",
     "spec/spec_helper.rb"
   ]

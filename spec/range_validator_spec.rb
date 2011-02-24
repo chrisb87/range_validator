@@ -1,4 +1,5 @@
 require 'range_validator'
+require 'spec_helper'
 
 describe "RangeValidator" do
 
@@ -13,21 +14,21 @@ describe "RangeValidator" do
     it "should not accept a #{bad_argument.class} (#{bad_argument.inspect}) as an argument to :overlapping" do
       expect {
         TestModel.validates :duration, :range => { :overlapping => bad_argument }
-      }.to raise_error ArgumentError, ":overlapping must be a Symbol or a Proc"
+      }.to raise_error ArgumentError, ":overlapping must be a symbol or a proc"
     end
   end
 
   it "should be valid when the field is a range" do
     TestModel.validates :duration, :range => true
     record = TestModel.new({:duration => 0..1})
-
+  
     record.should be_valid
   end
-
+  
   it "should not be valid when the field is not a range" do
     TestModel.validates :name, :range => true
     record = TestModel.new({:name => "name"})
-
+  
     record.should_not be_valid
     record.errors.should == {:name => ["is not a range"]}
   end
@@ -52,6 +53,18 @@ describe "RangeValidator" do
       record2.should_not be_valid
       record2.errors.should == {:date_range => ["does not overlap"]}
     end
+    
+    it "should not be valid when overlapping an empty set" do
+      record = TestModel.new({:date_range => @ranges[:january], :other_records => []})
+      record.should_not be_valid
+      record.errors.should == {:date_range => ["does not overlap"]}
+    end
+    
+    it "should not be valid when overlapping nil" do
+      record = TestModel.new({:date_range => @ranges[:january], :other_records => nil})
+      record.should_not be_valid
+      record.errors.should == {:date_range => ["does not overlap"]}
+    end
 
   end
 
@@ -74,6 +87,16 @@ describe "RangeValidator" do
 
       record2.should_not be_valid
       record2.errors.should == {:date_range => ["overlaps"]}
+    end
+    
+    it "should be valid when overlapping nil" do
+      record = TestModel.new({:date_range => @ranges[:january], :other_records => nil})
+      record.should be_valid
+    end
+    
+    it "should be valid when overlapping an empty set" do
+      record = TestModel.new({:date_range => @ranges[:january], :other_records => []})
+      record.should be_valid
     end
 
     it "should not detect overlap with other records with the same object_id" do
