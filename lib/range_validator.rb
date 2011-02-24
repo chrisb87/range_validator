@@ -20,31 +20,31 @@ module ActiveModel
 
       def validate_each(record, attribute, value)
         unless value.is_a? Range
-          record.errors.add attribute, :not_a_range
+          record.errors.add(attribute, :not_a_range)
           return
         end
 
         options.slice(*OPTIONS).each do |option, option_value|
           other_records = retrieve_other_records(record, option_value)
 
-          if option == :overlapping and other_records.blank?
-            record.errors.add attribute, :no_overlap
+          if option == :overlapping && other_records.blank?
+            record.errors.add(attribute, :no_overlap)
           end
 
           other_records.each do |other_record|
             overlap = value.overlaps? other_record.send(attribute)
 
-            if option == :overlapping and not overlap
-              record.errors.add attribute, :no_overlap
-            elsif option == :not_overlapping and overlap
-              record.errors.add attribute, :overlap
+            if option == :overlapping && !overlap
+              record.errors.add(attribute, :no_overlap)
+            elsif option == :not_overlapping && overlap
+              record.errors.add(attribute, :overlap)
             end
           end
         end
       end
-      
+
       protected
-      
+
         def retrieve_other_records(record, lookup)
           if lookup.is_a?(Symbol)
             other_records = record.send(lookup)
@@ -52,17 +52,13 @@ module ActiveModel
             other_records = lookup.call(record)
           end
 
-          other_records ||= []
+          responds_to_key = record.respond_to?(:to_key) && !record.to_key.blank?
 
-          other_records.reject!{ |other_record| other_record.equal? record }
-
-          if record.respond_to?(:to_key) and not record.to_key.blank?
-            other_records.reject!{ |other_record| other_record.to_key == record.to_key }
+          (other_records || []).reject do |other_record| 
+            other_record.equal?(record) || (responds_to_key && other_record.to_key == record.to_key)
           end
-          
-          other_records
         end
-    end
+      end
 
     module HelperMethods
       # Validates that the specified attributes are valid ranges and, optionally, that they do
