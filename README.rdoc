@@ -1,6 +1,6 @@
 = range_validator
 
-Adds a RangeValidator to ActiveModel::Validations.
+Range validator for ActiveModel
 
   validates :field, :range => true
   validates :field, :range => { :overlapping => :other_records }
@@ -46,7 +46,7 @@ We can use the range validator to ensure that two meetings cannot be booked in
 the same room at the same time.
 
   class Meeting < ActiveRecord::Base
-    validates :duration, :range => { :not_overlapping => Proc.new{ |m| Meeting.where :room => m.room } }
+    validates :duration, :range => { :not_overlapping => Proc.new{ |m| Meeting.where(:room => m.room) } }
   
     def duration
       meeting_start..meeting_end
@@ -74,9 +74,9 @@ Now meetings will validate like so:
   other_meeting.room = 4
   other_meeting.valid? # => true
 
-Constructing complex Procs in the validates method can become messy fast. We
+Constructing complex procs in the validates method can become messy fast. We
 can move that logic into an instance method on the Meeting class and pass
-a Symbol to the range validator instead.
+a symbol to the range validator instead.
 
   class Meeting < ActiveRecord::Base
     validates :duration, :range => { :not_overlapping => :meetings_in_same_room }

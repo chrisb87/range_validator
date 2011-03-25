@@ -45,20 +45,20 @@ module ActiveModel
 
       protected
 
-        def retrieve_other_records(record, lookup)
-          if lookup.is_a?(Symbol)
-            other_records = record.send(lookup)
-          elsif lookup.is_a?(Proc)
-            other_records = lookup.call(record)
-          end
+      def retrieve_other_records(record, lookup)
+        if lookup.is_a?(Symbol)
+          other_records = record.send(lookup)
+        elsif lookup.is_a?(Proc)
+          other_records = lookup.call(record)
+        end
 
-          responds_to_key = record.respond_to?(:to_key) && !record.to_key.blank?
+        responds_to_key = record.respond_to?(:to_key) && !record.to_key.blank?
 
-          (other_records || []).reject do |other_record| 
-            other_record.equal?(record) || (responds_to_key && other_record.to_key == record.to_key)
-          end
+        (other_records || []).reject do |other_record| 
+          other_record.equal?(record) || (responds_to_key && other_record.to_key == record.to_key)
         end
       end
+    end
 
     module HelperMethods
       # Validates that the specified attributes are valid ranges and, optionally, that they do

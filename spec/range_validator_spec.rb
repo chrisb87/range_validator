@@ -9,14 +9,6 @@ describe "RangeValidator" do
                 :february            => Date.civil(2011,2,1)..Date.civil(2011,2,28),
                 :january_to_february => Date.civil(2011,1,1)..Date.civil(2011,2,28)}
   end
-  
-  [3, "foo", 1..6, nil].each do |bad_argument|
-    it "should not accept a #{bad_argument.class} (#{bad_argument.inspect}) as an argument to :overlapping" do
-      expect {
-        TestModel.validates :duration, :range => { :overlapping => bad_argument }
-      }.to raise_error ArgumentError, ":overlapping must be a symbol or a proc"
-    end
-  end
 
   it "should be valid when the field is a range" do
     TestModel.validates :duration, :range => true
@@ -64,6 +56,12 @@ describe "RangeValidator" do
       record = TestModel.new({:date_range => @ranges[:january], :other_records => nil})
       record.should_not be_valid
       record.errors.should == {:date_range => ["does not overlap"]}
+    end
+    
+    it "should throw an error when given a bad argument" do
+      expect {
+        TestModel.validates :duration, :range => { :overlapping => nil }
+      }.to raise_error ArgumentError, ":overlapping must be a symbol or a proc"
     end
 
   end
